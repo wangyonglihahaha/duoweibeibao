@@ -1,0 +1,64 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#define MaxN 51
+int weight[MaxN][MaxN];//物品重量
+double value[MaxN];//物品价值
+double ans=-1;//结果最好的价值 
+int x[MaxN];//记录结果的数组 
+//now 为当前价值 ,nw为当前每组所求价值，w为每组的约束价值 
+void getans(int n,int m,int i,int a[],double now,int nw[],int w[]) //递归函数 
+{
+	if(i>n-1){
+		if(now>ans){//如果当前价值大于最好价值更新结果 
+			ans=now;
+			int k;
+			for(k=0;k<n;++k)//更新结果  
+				x[k]=a[k];
+		}
+		return ;
+	}
+	int j;
+	int flag=0;
+	for(j=0;j<m;++j){
+		if(w[j]<nw[j]+weight[j][i])
+			flag=1;
+	}//查找加入这个值后每组是否符合条件，符合的话flag=1 
+	if(!flag){
+		a[i]=1;//标记选这个值 等于1表示选，0表示不选 
+		for(j=0;j<m;++j)//更新当前每组的价值 
+			nw[j]+=weight[j][i];
+		getans(n,m,i+1,a,now+value[i],nw,w);//下一组 
+		for(j=0;j<m;++j)
+			nw[j]-=weight[j][i];//取消更新当前每组的价值 
+			
+	}
+	a[i]=0;//不选
+	getans(n,m,i+1,a,now,nw,w);//下一组 
+}
+int main()
+{
+	int n,m,i,j;
+	int w[MaxN];
+	int a[MaxN];
+	int nw[MaxN];
+	memset(nw,0,sizeof(nw));
+	memset(a,0,sizeof(a));
+	printf("请输入物品个数和属性个数:\n");
+	scanf("%d%d",&n,&m);
+	printf("请依次输入物品的价值:\n");
+	for(i=0;i<n;++i)
+		scanf("%lf",&value[i]);
+	printf("请依次输入物品的属性的数值:\n");
+	for(i=0;i<m;++i)
+		for(j=0;j<n;++j)
+			scanf("%d",&weight[i][j]);
+	for(i=0;i<m;++i)
+		scanf("%d",&w[i]);
+	getans(n,m,0,a,0,nw,w);
+	printf("回溯法:\nx=[");
+	for (i = 0; i < n; i++)
+		printf("%d ",x[i]);
+	printf("]\n总价值%lf\n",ans);		
+	return 0;
+}
